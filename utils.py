@@ -38,3 +38,16 @@ def normalize_url(url: str) -> str:
 
     qs = [(k, v) for k, v in parse_qsl(p.query) if not k.startswith('utm_')]
     return urlunparse((p.scheme, netloc, p.path or '/', p.params, urlencode(qs), p.fragment))
+
+
+def qr_png_base64(data: str) -> str:
+    """Generate a PNG QR code for the given data and return it as base64 string.
+
+    Useful for embedding in JSON responses as data URLs.
+    """
+
+    img = qrcode.make(data)
+    bio = io.BytesIO()
+    img.save(bio, format = "PNG")
+    bio.seek(0)
+    return base64.b64encode(bio.read()).decode('ascii')
