@@ -25,3 +25,11 @@ class Url(Base):
     is_active = Column(Boolean, default=True)
 
 
+class URLStats(Base):
+    """
+    Aggregated click stats for a URL.
+    """
+    __tablename__ = 'url_stats'
+    url_id = Column(BI, ForeignKey('urls.id'), primary_key=True)
+    total_clicks = Column(BI, default=0)
+    last_flushed = Column(DateTime(timezone=True), nullable = True)
