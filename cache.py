@@ -41,3 +41,19 @@ def get_buffered_clicks_total() -> int:
     """Return total buffered clicks currently in Redis (integer sum)."""
     vals = r.hvals("clicks") or []
     return sum(int(v) for v in vals)
+
+
+def read_and_clear_clicks_atomic():
+    """Atomically read and clear clicks in Redis for processing.
+
+    Note: simple implementation using HGETALL followed by HDEL. For production,
+    consider the safer rename-or-lua approach to avoid loss on crashes.
+    Returns a dict {url_id: count}
+    """
+    clicks = r.hgetall("clicks") or {}
+    if clicks:
+        # delete those fields
+        for k in clicks.keys():
+            r.hdel("clicks", k)
+            r.srem("clicks_pending", k)
+    return {int(k): int(v) for k, v in clicks.items()}
