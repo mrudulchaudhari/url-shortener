@@ -26,3 +26,12 @@ def cache_get_code(code: str):
     key = f"code:{code}"
     v = r.get(key)
     return json.loads(v) if v else None
+
+
+def increment_click_redis(url_id:int, delta: int = 1):
+    """Increment click counter for a URL in Redis (buffer).
+    Uses a single hash 'clicks' and a set 'clicks_pending' to track which url_ids
+    have buffered counts to be flushed by a background job.
+    """
+    r.hincrby("clicks", url_id, delta)
+    r.sadd("clicks_pending", url_id)
