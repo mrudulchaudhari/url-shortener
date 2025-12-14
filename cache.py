@@ -35,3 +35,9 @@ def increment_click_redis(url_id:int, delta: int = 1):
     """
     r.hincrby("clicks", url_id, delta)
     r.sadd("clicks_pending", url_id)
+
+
+def get_buffered_clicks_total() -> int:
+    """Return total buffered clicks currently in Redis (integer sum)."""
+    vals = r.hvals("clicks") or []
+    return sum(int(v) for v in vals)
