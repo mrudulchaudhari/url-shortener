@@ -168,6 +168,15 @@ def register_routes(app):
         return "OK", 200
 
 
+    @app.route("/stats")
+    def stats():
+        """Returns lightweight stats: total URLs and buffered clicks in Redis."""
+        session = get_session()
+        total = session.query(URLStats).count()
+        session.close()
 
+        import cache
+        buffered = cache.get_buffered_clicks_total()
+        return jsonify({"total_urls": total, "buffered_clicks": buffered})
 
 
