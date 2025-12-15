@@ -105,3 +105,45 @@ def register_routes(app):
 
         finally:
             session.close()
+
+
+        @app.route("/<code>", methods=["GET"])
+        def go(code):
+            """Endpoint: resolve a short code and redirect to original URL.
+
+            Fast path: try redis cache. If cached and active, increment redis click buffer and redirect.
+            Cold path: fetch DB, set cahce, increment click buffer, then redirect.
+            """
+
+        cached = cache_get_code(code)
+        if cached:
+            if cached.get("expires_at"):
+                exp = datetime.fromisoformat(cached["expires_at"])
+                if exp <= datetime.now(timezone.utc):
+                    return ("Expired", 410)
+
+            increment_click_redis(cached["url_id"])
+            return redirect(cached["original_url"], code = 302)
+
+        # if cache miss
+        session = get_session()
+        u = session.query(Url).filter_by(code=code, is_active=True).first()
+        if not u:
+            session.close()
+            abort(404)
+        if u.expires_at and u.expires_at <= datetime.now(timezone.utc):
+            session.close()
+            return ("Expired", 410)
+
+        payload = {
+            "url_id": u.id,
+            "original_url": u.original_url,
+            "is_active": u.is_active,
+            "expires_at": u.expires_at.isoformat() if u.expires_at else None
+        }
+        cache_set_code(code, payload, ttl=app.config["CACHE_TTL"])
+        increment_click_redis(u.id)
+        session.close()
+        return redirect(u.original_url, code = 302)
+
+
