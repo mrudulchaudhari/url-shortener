@@ -151,11 +151,11 @@ def register_routes(app):
     def qr_png(code):
         """Endpoint: return PNG image of QR for a short code.
 
-        This generates a QR pointing to the short UTL and streams it as PNG.
+        This generates a QR pointing to the short URL and streams it as PNG.
         """
-        short_url = f"https://{app.config["HOST"]}/{code}"
-        img_bytes = qr_png_base64(code)
-
+        short_url = f"https://{app.config['HOST']}/{code}"
+        img_bytes = qr_png_base64(short_url)
+        # convert base64 to bytes for send_file
         import base64, io
         bio = io.BytesIO(base64.b64decode(img_bytes))
         bio.seek(0)
