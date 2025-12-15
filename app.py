@@ -162,6 +162,12 @@ def register_routes(app):
         return send_file(bio, mimetype="image/png", as_attachment=False, download_name=f"{code}.png")
 
 
+    @app.route("/healthz")
+    def healthz():
+        """Simple liveness health check for load-balancers."""
+        return "OK", 200
+
+
 
 
 
