@@ -107,13 +107,13 @@ def register_routes(app):
             session.close()
 
 
-        @app.route("/<code>", methods=["GET"])
-        def go(code):
-            """Endpoint: resolve a short code and redirect to original URL.
+    @app.route("/<code>", methods=["GET"])
+    def go(code):
+        """Endpoint: resolve a short code and redirect to original URL.
 
-            Fast path: try redis cache. If cached and active, increment redis click buffer and redirect.
-            Cold path: fetch DB, set cahce, increment click buffer, then redirect.
-            """
+        Fast path: try redis cache. If cached and active, increment redis click buffer and redirect.
+        Cold path: fetch DB, set cahce, increment click buffer, then redirect.
+        """
 
         cached = cache_get_code(code)
         if cached:
@@ -145,5 +145,38 @@ def register_routes(app):
         increment_click_redis(u.id)
         session.close()
         return redirect(u.original_url, code = 302)
+
+
+    @app.route("/<code>/qr.png", methods=["GET"])
+    def qr_png(code):
+        """Endpoint: return PNG image of QR for a short code.
+
+        This generates a QR pointing to the short URL and streams it as PNG.
+        """
+        short_url = f"https://{app.config['HOST']}/{code}"
+        img_bytes = qr_png_base64(short_url)
+        # convert base64 to bytes for send_file
+        import base64, io
+        bio = io.BytesIO(base64.b64decode(img_bytes))
+        bio.seek(0)
+        return send_file(bio, mimetype="image/png", as_attachment=False, download_name=f"{code}.png")
+
+
+    @app.route("/healthz")
+    def healthz():
+        """Simple liveness health check for load-balancers."""
+        return "OK", 200
+
+
+    @app.route("/stats")
+    def stats():
+        """Returns lightweight stats: total URLs and buffered clicks in Redis."""
+        session = get_session()
+        total = session.query(URLStats).count()
+        session.close()
+
+        import cache
+        buffered = cache.get_buffered_clicks_total()
+        return jsonify({"total_urls": total, "buffered_clicks": buffered})
 
 
