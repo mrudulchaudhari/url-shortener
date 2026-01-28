@@ -3,6 +3,8 @@ import json
 from datetime import datetime, timezone
 
 from flask import Flask, request, jsonify, redirect, abort, send_file
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from sqlalchemy.exc import IntegrityError
 
 from db import init_db, get_session
@@ -16,6 +18,9 @@ HOST = os.getenv("HOST", "localhost:8000")
 CACHE_TTL = int(os.getenv("CACHE_TTL", "3600"))
 
 
+limiter = Limiter(key_func=get_remote_address)
+
+
 def create_app():
     """Create and configure the Flask app instance.
     Returns:
@@ -26,6 +31,9 @@ def create_app():
     app.config["REDIS_URL"] = REDIS_URL
     app.config["CACHE_TTL"] = CACHE_TTL
     app.config["HOST"] = HOST
+
+    app.config["RATELIMIT_STORAGE_URI"] = REDIS_URL
+    limiter.init_app(app)
 
     with app.app_context():
         init_db()
@@ -42,6 +50,7 @@ def register_routes(app):
     """
 
     @app.route("/shorten", methods=["POST"])
+    @limiter.limit("10/minute")
     def shorten():
         """
         Endpoint: shorten a provided URL.
