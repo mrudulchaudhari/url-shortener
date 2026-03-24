@@ -16,7 +16,7 @@ except ImportError:
             return func
         return decorator
 
-from .models import Url
+from .models import ShortenedURL
 from .serializers import UrlSerializer
 from .cache import invalidate_cache
 

@@ -16,8 +16,32 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from shortener.frontend_views import index, api_welcome
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+
+    # Frontend
+    path("", index, name="home"),  # Root path - Beautiful frontend
+    path("app/", index, name="frontend"),
+    path("api/", api_welcome, name="api_welcome"),  # API info
+
+    # API endpoints
+    path("auth/", include("accounts.urls")),
+    path("analytics/", include("analytics.urls")),
+    path("", include("shortener.urls")),
 ]
+
+# Add API documentation if drf_spectacular is available
+try:
+    from drf_spectacular.views import (
+        SpectacularAPIView,
+        SpectacularSwaggerView,
+        SpectacularRedocView
+    )
+    urlpatterns.insert(2, path("api/schema/", SpectacularAPIView.as_view(), name="schema"))
+    urlpatterns.insert(3, path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"))
+    urlpatterns.insert(4, path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"))
+except ImportError:
+    pass
