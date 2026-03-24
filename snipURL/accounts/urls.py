@@ -1,18 +1,10 @@
-"""
-URL patterns for accounts app.
-"""
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
-from . import views
-
-app_name = 'accounts'
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import RegisterView, ProfileView
 
 urlpatterns = [
-    path('register', views.register, name='register'),
-    path('login', views.login, name='login'),
-    path('profile', views.profile, name='profile'),
-    path('change-password', views.change_password, name='change_password'),
-    path('regenerate-api-key', views.regenerate_api_key, name='regenerate_api_key'),
-    path('my-urls', views.my_urls, name='my_urls'),
-    path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', TokenObtainPairView.as_view(), name='login'),
+    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('profile/', ProfileView.as_view(), name='profile'),
 ]
