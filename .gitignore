@@ -1,3 +1,54 @@
+# Python
+*.py[cod]
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
 venv/
 env/
+ENV/
+.venv
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+.env
+.env.local
+
+# IDE
 .idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+*.pyc
+
+# Test
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Migrations (optional - comment out if you want to commit them)
+# */migrations/*.py
+# !*/migrations/__init__.py
