@@ -1,3 +1,6 @@
-from django.shortcuts import render
+# Analytics views - to be implemented in Phase 4
+from django.http import HttpResponse
 
-# Create your views here.
+def placeholder_view(request):
+    """Placeholder view for now"""
+    return HttpResponse("Analytics views - to be implemented in Phase 4")
